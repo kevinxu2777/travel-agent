@@ -1,0 +1,27 @@
+{
+  "seats_aero": {
+    "api_key": "$SEATS_AERO_API_KEY",
+    "origins": ["SFO", "LAX", "SEA", "JFK", "EWR", "ORD", "IAD", "DFW", "IAH", "ATL", "BOS", "SJC"],
+    "destinations": ["NRT", "HND", "KIX", "NGO", "FUK"],
+    "carriers": ["NH", "JL", "UA", "AA"],
+    "cabin": "business",
+    "search_window_days": 60,
+    "only_direct_flights": false,
+    "min_remaining_seats": 1
+  },
+  "trip": {
+    "start_date": "",
+    "end_date": ""
+  },
+  "poll_interval_seconds": 1800,
+  "email": {
+    "subject": "美日商务舱里程票放位提醒",
+    "smtp_host": "$SMTP_HOST",
+    "smtp_port": 587,
+    "username": "$SMTP_USERNAME",
+    "password": "$SMTP_PASSWORD",
+    "from": "$SMTP_FROM",
+    "starttls": true,
+    "to": ["$ALERT_EMAIL_TO"]
+  }
+}

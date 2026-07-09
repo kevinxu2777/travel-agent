@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.venv/
+*.log
+*.sqlite3
+dashboard.html
+config.local.json
+.DS_Store
+wallet.json
+*_demo.sqlite3
+dashboard_demo.html
+profile.json
+points_os.sqlite3

@@ -1,0 +1,14 @@
+{
+  "_comment": "复制为 wallet.json 后填入你的真实余额。points 是银行可转点体系，airline_miles 是航司里程账户余额（key 用 seats.aero 的 program 名，如 united/alaska/aeroplan）。",
+  "points": {
+    "amex_mr": 0,
+    "chase_ur": 0,
+    "citi_typ": 0,
+    "capital_one": 0,
+    "bilt": 0
+  },
+  "airline_miles": {
+    "united": 0,
+    "alaska": 0
+  }
+}

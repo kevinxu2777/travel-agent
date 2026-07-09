@@ -1,0 +1,147 @@
+{
+  "_comment": "美国主流可转点体系 -> 航司常旅客计划（program 名与 seats.aero Source 对应）。整理时间 2026-07，转点前务必到银行官网核实比例和到账时间。ratio 为 银行点数:航司里程，如 0.8 表示 1000 点换 800 里程。",
+  "currencies": {
+    "amex_mr": "Amex Membership Rewards",
+    "chase_ur": "Chase Ultimate Rewards",
+    "citi_typ": "Citi ThankYou Points",
+    "capital_one": "Capital One Miles",
+    "bilt": "Bilt Rewards"
+  },
+  "programs": {
+    "aeroplan": {
+      "display": "Air Canada Aeroplan",
+      "transfers": {
+        "amex_mr": {"ratio": 1.0, "time": "即时"},
+        "chase_ur": {"ratio": 1.0, "time": "即时"},
+        "capital_one": {"ratio": 1.0, "time": "即时"},
+        "bilt": {"ratio": 1.0, "time": "即时"}
+      }
+    },
+    "united": {
+      "display": "United MileagePlus",
+      "transfers": {
+        "chase_ur": {"ratio": 1.0, "time": "即时"},
+        "bilt": {"ratio": 1.0, "time": "即时"}
+      }
+    },
+    "american": {
+      "display": "American AAdvantage",
+      "transfers": {
+        "citi_typ": {"ratio": 1.0, "time": "即时", "note": "2025 年新增渠道，转出前再核实"}
+      }
+    },
+    "alaska": {
+      "display": "Alaska Atmos Rewards",
+      "transfers": {
+        "bilt": {"ratio": 1.0, "time": "即时", "note": "2025 年新增渠道，转出前再核实"}
+      }
+    },
+    "flyingblue": {
+      "display": "Air France/KLM Flying Blue",
+      "transfers": {
+        "amex_mr": {"ratio": 1.0, "time": "即时"},
+        "chase_ur": {"ratio": 1.0, "time": "即时"},
+        "citi_typ": {"ratio": 1.0, "time": "即时"},
+        "capital_one": {"ratio": 1.0, "time": "即时"},
+        "bilt": {"ratio": 1.0, "time": "即时"}
+      }
+    },
+    "virginatlantic": {
+      "display": "Virgin Atlantic Flying Club",
+      "transfers": {
+        "amex_mr": {"ratio": 1.0, "time": "即时"},
+        "chase_ur": {"ratio": 1.0, "time": "即时"},
+        "citi_typ": {"ratio": 1.0, "time": "即时"},
+        "capital_one": {"ratio": 1.0, "time": "即时"},
+        "bilt": {"ratio": 1.0, "time": "即时"}
+      }
+    },
+    "lifemiles": {
+      "display": "Avianca LifeMiles",
+      "transfers": {
+        "amex_mr": {"ratio": 1.0, "time": "即时"},
+        "citi_typ": {"ratio": 1.0, "time": "即时"},
+        "capital_one": {"ratio": 1.0, "time": "即时"},
+        "bilt": {"ratio": 1.0, "time": "即时"}
+      }
+    },
+    "singapore": {
+      "display": "Singapore KrisFlyer",
+      "transfers": {
+        "amex_mr": {"ratio": 1.0, "time": "约1-2天"},
+        "chase_ur": {"ratio": 1.0, "time": "约1-2天"},
+        "citi_typ": {"ratio": 1.0, "time": "约1-2天"},
+        "capital_one": {"ratio": 1.0, "time": "约1-2天"}
+      }
+    },
+    "turkish": {
+      "display": "Turkish Miles&Smiles",
+      "transfers": {
+        "citi_typ": {"ratio": 1.0, "time": "即时"},
+        "capital_one": {"ratio": 1.0, "time": "即时"},
+        "bilt": {"ratio": 1.0, "time": "即时"}
+      }
+    },
+    "qatar": {
+      "display": "Qatar Avios",
+      "transfers": {
+        "amex_mr": {"ratio": 1.0, "time": "即时"},
+        "citi_typ": {"ratio": 1.0, "time": "即时"}
+      }
+    },
+    "etihad": {
+      "display": "Etihad Guest",
+      "transfers": {
+        "amex_mr": {"ratio": 1.0, "time": "即时"},
+        "citi_typ": {"ratio": 1.0, "time": "即时"},
+        "capital_one": {"ratio": 1.0, "time": "即时"}
+      }
+    },
+    "qantas": {
+      "display": "Qantas Frequent Flyer",
+      "transfers": {
+        "amex_mr": {"ratio": 1.0, "time": "即时"},
+        "citi_typ": {"ratio": 1.0, "time": "即时"},
+        "capital_one": {"ratio": 1.0, "time": "即时"}
+      }
+    },
+    "emirates": {
+      "display": "Emirates Skywards",
+      "transfers": {
+        "amex_mr": {"ratio": 1.0, "time": "即时"},
+        "chase_ur": {"ratio": 1.0, "time": "即时"},
+        "capital_one": {"ratio": 1.0, "time": "即时"},
+        "bilt": {"ratio": 1.0, "time": "即时"}
+      }
+    },
+    "jetblue": {
+      "display": "JetBlue TrueBlue",
+      "transfers": {
+        "amex_mr": {"ratio": 0.8, "time": "即时"},
+        "chase_ur": {"ratio": 1.0, "time": "即时"},
+        "citi_typ": {"ratio": 1.0, "time": "即时"}
+      }
+    },
+    "delta": {
+      "display": "Delta SkyMiles",
+      "transfers": {
+        "amex_mr": {"ratio": 1.0, "time": "即时"}
+      }
+    },
+    "velocity": {
+      "display": "Virgin Australia Velocity",
+      "transfers": {},
+      "note": "美国主流信用卡点数无法转入（Velocity 只接美国以外的部分体系）"
+    },
+    "lufthansa": {
+      "display": "Lufthansa Miles & More",
+      "transfers": {},
+      "note": "美国主流信用卡点数无法直接转入"
+    },
+    "azul": {
+      "display": "Azul TudoAzul",
+      "transfers": {},
+      "note": "美国主流信用卡点数无法直接转入"
+    }
+  }
+}

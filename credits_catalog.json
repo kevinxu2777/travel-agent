@@ -1,0 +1,39 @@
+{
+  "_comment": "信用卡报销 credit 权益目录（模板）。2025 年各家大改版后权益变动频繁，这里只是常见结构的示例：请对照你自己卡片的官网权益页增删条目和金额。cycle 取值：monthly / quarterly / semiannual / yearly。tag 为 airline_fees 的条目会在 advise 里被建议用来覆盖机票税费。",
+  "cards": {
+    "amex_platinum": {
+      "display": "Amex Platinum",
+      "credits": [
+        {"id": "uber", "name": "Uber Cash", "amount": 15, "cycle": "monthly", "note": "12 月更高，需绑卡到 Uber"},
+        {"id": "digital", "name": "Digital Entertainment", "amount": 25, "cycle": "monthly", "note": "限指定订阅服务"},
+        {"id": "airline_fee", "name": "Airline Fee Credit", "amount": 200, "cycle": "yearly", "tag": "airline_fees", "note": "需预先选定航司，报销杂费/税费类支出"},
+        {"id": "hotel", "name": "FHR/THC 酒店 Credit", "amount": 200, "cycle": "yearly", "note": "限 FHR/The Hotel Collection 预订"},
+        {"id": "saks", "name": "Saks Credit", "amount": 50, "cycle": "semiannual"},
+        {"id": "clear", "name": "CLEAR Plus Credit", "amount": 209, "cycle": "yearly"}
+      ]
+    },
+    "amex_gold": {
+      "display": "Amex Gold",
+      "credits": [
+        {"id": "dining", "name": "Dining Credit", "amount": 10, "cycle": "monthly", "note": "限指定商户"},
+        {"id": "uber", "name": "Uber Cash", "amount": 10, "cycle": "monthly"},
+        {"id": "resy", "name": "Resy Credit", "amount": 50, "cycle": "semiannual"},
+        {"id": "dunkin", "name": "Dunkin Credit", "amount": 7, "cycle": "monthly"}
+      ]
+    },
+    "chase_sapphire_reserve": {
+      "display": "Chase Sapphire Reserve",
+      "credits": [
+        {"id": "travel", "name": "Travel Credit", "amount": 300, "cycle": "yearly", "tag": "airline_fees", "note": "任何旅行类消费自动报销"},
+        {"id": "edit_hotel", "name": "The Edit 酒店 Credit", "amount": 250, "cycle": "semiannual", "note": "2025 改版新增，限 The Edit 预订"},
+        {"id": "dining", "name": "指定餐厅 Credit", "amount": 150, "cycle": "semiannual", "note": "2025 改版新增"}
+      ]
+    },
+    "boa_premium_rewards": {
+      "display": "BoA Premium Rewards",
+      "credits": [
+        {"id": "airline_incidental", "name": "Airline Incidental Credit", "amount": 100, "cycle": "yearly", "tag": "airline_fees"}
+      ]
+    }
+  }
+}

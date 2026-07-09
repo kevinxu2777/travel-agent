@@ -1,0 +1,23 @@
+{
+  "_comment": "复制为 profile.json 后填入真实数据。这是你的私人档案：点数余额、持有卡片、转点偏好。profile.json 已在 .gitignore 中，不会被提交。",
+  "points": {
+    "amex_mr": 0,
+    "chase_ur": 0,
+    "citi_typ": 0,
+    "capital_one": 0,
+    "bilt": 0
+  },
+  "airline_miles": {
+    "united": 0,
+    "alaska": 0
+  },
+  "cards": ["amex_platinum", "amex_gold", "chase_sapphire_reserve"],
+  "preferences": {
+    "risk_tolerance": "medium",
+    "_risk_comment": "low=只接受即时到账的转点方案; medium=接受1-2天到账; high=任何渠道都行",
+    "reserve_points": {
+      "_comment": "留底不动用的点数，advise 时会先扣掉",
+      "amex_mr": 0
+    }
+  }
+}
