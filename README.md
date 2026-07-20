@@ -55,14 +55,20 @@ python3 award_watch.py
 
 默认轮询间隔 1800 秒（30 分钟），可以在 `config.example.json` 里改 `poll_interval_seconds`。里程放位不像股价那样分秒必争，没必要调得比这更频繁，也能省 API 配额。
 
-如果已经把 Gmail App Password 存进 Keychain（跟 `market-monitor-agent` 用的是同一个 Gmail 账号/同一份 Keychain 记录），可以直接双击：
+邮箱配置放在 `.env.local`（gitignored）：
+
+```bash
+cp .env.example .env.local   # 填入 AWARD_WATCH_EMAIL
+```
+
+如果已经把 Gmail App Password 存进 Keychain（跟 `market-watch` 用的是同一个 Gmail 账号/同一份 Keychain 记录），可以直接双击：
 
 ```text
 run_award_watch.command
 send_test_email.command
 ```
 
-如果还没配置过，先去 `market-monitor-agent/setup_gmail_password.command` 走一遍（两个工具复用同一个 SMTP 配置，不用重复设置）。
+如果还没配置过，先去 `market-watch/setup_gmail_password.command` 走一遍（两个工具复用同一个 SMTP 配置，不用重复设置）。
 
 ## 监控范围配置
 

@@ -11,3 +11,4 @@ wallet.json
 dashboard_demo.html
 profile.json
 points_os.sqlite3
+.env.local
