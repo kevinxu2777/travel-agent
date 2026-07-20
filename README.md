@@ -1,5 +1,54 @@
 # Award Travel Copilot
 
+> **Status: retired · 已归档（2026-07）.** Shipped, worked, then deliberately sunset after
+> concluding the watcher half duplicates seats.aero Pro's native alerts — the honest
+> write-up is in the [Retrospective](#retrospective--复盘). Kept public as a reference.
+
+![Award Watch dashboard (demo data)](docs/dashboard.png)
+*Dashboard rendered from `--demo` generated data — no real balances shown.*
+
+**What it is** — an "execution layer" for credit-card points travel. Generic award-search
+tools tell you a seat exists; this answers the question they can't: *can **I** actually book
+it — from which points currency, transferring how much, with taxes charged to which card
+credit?*
+
+- **`award_watch.py`** — polling daemon: watches US ↔ Japan business-class award space via
+  the seats.aero Partner API, dedupes into SQLite, renders a filterable/sortable HTML
+  dashboard (dark/light), and emails alerts with balance-aware transfer advice
+- **`points_os.py`** — the personal side as a CLI: point balances and card-credit
+  usage/expiry (`status`), plus `advise`, which re-ranks all watched availability by what is
+  genuinely executable with your balances (exact transfer amounts, instant vs. delayed
+  partners, partial direct-balance top-ups)
+
+Pure Python standard library — zero dependencies. All personal data lives in local
+gitignored JSON; nothing ever leaves your machine except SMTP alerts to yourself.
+Covered by unit tests (`python3 test_award_watch.py`).
+
+## Retrospective · 复盘
+
+**EN** — After shipping I audited what seats.aero Pro (which this project requires anyway)
+already offers: unlimited alerts by route, cabin, program, date range, and max mileage
+price, plus filtering by transferable-currency ecosystem. That is the entire watcher half
+of this project, done upstream, more reliably than a laptop daemon. The genuinely novel
+remainder — balance-aware transfer math and matching taxes to unused card credits — is
+real but thin for a single-currency wallet: a human does it in thirty seconds once alerted.
+So I retired the watcher, set native seats.aero alerts, and kept `points_os` (credit-expiry
+tracking doesn't overlap with anything I pay for). The lesson worth keeping: **map the
+incumbent's paid tier before building, and when the overlap turns out fatal, sunset cleanly
+instead of maintaining a worse duplicate.**
+
+**中文** — 上线后系统对比了 seats.aero Pro（本项目本来就依赖它）的功能清单：按航线/舱位/
+计划/日期/里程价上限的无限量提醒 + 按可转点体系筛选，等于把本项目"盯票"的一半原生做完了，
+还比笔记本上的守护进程稳定。真正独有的部分——按你的余额算转点路径、税费匹配未用的卡
+credit——成立但很薄：单一币种钱包下人脑 30 秒就能算完。所以决定：退役盯票进程、改用
+seats.aero 原生 alert，保留 `points_os`（credit 过期追踪和任何已付费产品都不重合）。
+值得留下的教训：**动手造轮子前先把现有产品付费档摸透；发现重合致命时，干脆地归档比维护
+一个更差的复制品体面。**
+
+---
+
+以下为原始文档 / original docs:
+
 定位：**把信用卡点数真的花成一张好票**。不做通用个人金融 app，不做 credit 追踪主战场（MaxRewards/CardPointers 已占），不和 seats.aero 拼搜索——只做它们中间没人做深的执行层：这张票对**我**能不能订、从哪转、转多少、风险是什么。
 
 两个入口：
