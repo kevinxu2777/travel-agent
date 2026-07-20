@@ -222,6 +222,17 @@ def format_seats(remaining: int) -> str:
     return str(remaining) if remaining > 0 else "未知"
 
 
+# seats.aero 的 TotalTaxes 以货币最小单位计（USD/CAD 是分）；JPY/KRW 无小数位。
+ZERO_DECIMAL_CURRENCIES = {"JPY", "KRW"}
+
+
+def format_taxes(amount: int, currency: str) -> str:
+    cur = (currency or "").upper()
+    if cur in ZERO_DECIMAL_CURRENCIES:
+        return f"{amount:,} {cur}"
+    return f"{amount / 100:,.2f} {cur}".strip()
+
+
 def build_transfer_advice(hit: AvailabilityHit, wallet: dict[str, Any] | None, partners: dict[str, Any]) -> str:
     """One-line, per-hit answer to: 我的点数够不够，应该从哪转，转多少."""
     if wallet is None:
@@ -429,7 +440,7 @@ def build_email_body(
         text_lines.append(
             f"- {hit.date} {hit.origin}->{hit.destination} [{hit.program}] "
             f"{hit.airlines} 里程:{hit.mileage_cost} 余位:{format_seats(hit.remaining_seats)} "
-            f"税费:{hit.taxes} {hit.taxes_currency}"
+            f"税费:{format_taxes(hit.taxes, hit.taxes_currency)}"
             + (f" | {advice}" if advice else "")
         )
         advice_color = "#1a7f37" if advice.startswith("✔") else "#9a3412"
@@ -441,7 +452,7 @@ def build_email_body(
             f"<td style=\"border-top:1px solid #e6ebe8;\">{html.escape(hit.airlines)}</td>"
             f"<td style=\"border-top:1px solid #e6ebe8;\">{html.escape(hit.mileage_cost)}</td>"
             f"<td style=\"border-top:1px solid #e6ebe8;\">{html.escape(format_seats(hit.remaining_seats))}</td>"
-            f"<td style=\"border-top:1px solid #e6ebe8;\">{hit.taxes} {html.escape(hit.taxes_currency)}</td>"
+            f"<td style=\"border-top:1px solid #e6ebe8;\">{html.escape(format_taxes(hit.taxes, hit.taxes_currency))}</td>"
             f"<td style=\"border-top:1px solid #e6ebe8;color:{advice_color};\">{html.escape(advice)}</td>"
             "</tr>"
         )
@@ -491,6 +502,147 @@ def send_email(config: dict[str, Any], subject: str, text_body: str, html_body: 
     return True
 
 
+DASHBOARD_TEMPLATE = """<!doctype html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Award Watch</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      --page: #f9f9f7; --surface: #fcfcfb;
+      --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+      --hairline: #e1e0d9; --ring: rgba(11,11,11,0.10);
+      --good: #006300; --good-dot: #0ca30c;
+      --accent: #2a78d6; --wash: rgba(11,11,11,0.04);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --page: #0d0d0d; --surface: #1a1a19;
+        --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+        --hairline: #2c2c2a; --ring: rgba(255,255,255,0.10);
+        --good: #0ca30c; --good-dot: #0ca30c;
+        --accent: #3987e5; --wash: rgba(255,255,255,0.05);
+      }
+    }
+    body { margin: 0; padding: 32px 28px; background: var(--page); color: var(--ink); }
+    .wrap { max-width: 1180px; margin: 0 auto; }
+    header h1 { margin: 0; font-size: 20px; font-weight: 650; }
+    header p { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
+    .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 20px 0; }
+    .tile { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 14px 16px; }
+    .tile .label { font-size: 12px; color: var(--ink-2); }
+    .tile .value { font-size: 28px; font-weight: 600; margin-top: 4px; }
+    .tile .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .tile .sub.good { color: var(--good); }
+    .filters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0 0 12px; font-size: 13px; }
+    .filters select { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--hairline); border-radius: 7px; padding: 5px 8px; }
+    .filters label.toggle { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; color: var(--ink-2); }
+    .filters input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; }
+    .filters .count { margin-left: auto; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .card { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 9px 12px; border-top: 1px solid var(--hairline); white-space: nowrap; }
+    thead th { border-top: none; position: sticky; top: 0; background: var(--surface); color: var(--ink-2); font-size: 12px; font-weight: 600; }
+    th.sortable { cursor: pointer; user-select: none; }
+    th.sortable:hover { color: var(--ink); }
+    th .arrow { color: var(--accent); font-size: 10px; }
+    td.num { font-variant-numeric: tabular-nums; }
+    td.route { font-weight: 600; }
+    td.dim { color: var(--muted); font-size: 12px; }
+    td.advice { white-space: normal; min-width: 240px; max-width: 420px; color: var(--muted); }
+    tr.exec td.advice { color: var(--good); }
+    tbody tr:hover td { background: var(--wash); }
+    .empty { padding: 28px; text-align: center; color: var(--muted); }
+    footer { margin-top: 14px; font-size: 12px; color: var(--muted); line-height: 1.6; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Award Watch · 美日商务舱里程放位</h1>
+    <p>更新于 __UPDATED__ · 数据来自 seats.aero 缓存</p>
+  </header>
+  <div class="tiles">
+    <div class="tile"><div class="label">你可执行的放位</div><div class="value">__EXEC_COUNT__</div><div class="sub good">✔ 按 profile 余额过滤</div></div>
+    <div class="tile"><div class="label">当前可订放位</div><div class="value">__TOTAL_COUNT__</div><div class="sub">监控范围内全部</div></div>
+    <div class="tile"><div class="label">可执行最低里程价</div><div class="value">__MIN_MILES__</div><div class="sub">单程每人</div></div>
+    <div class="tile"><div class="label">银行可转点数</div><div class="value">__BANK_POINTS__</div><div class="sub">profile.json 合计</div></div>
+  </div>
+  <div class="filters">
+    <select id="f-origin"><option value="">出发地：全部</option>__ORIGIN_OPTIONS__</select>
+    <select id="f-dest"><option value="">到达地：全部</option>__DEST_OPTIONS__</select>
+    <select id="f-program"><option value="">计划：全部</option>__PROGRAM_OPTIONS__</select>
+    <label class="toggle"><input type="checkbox" id="f-exec"__EXEC_CHECKED__> 只看我可执行</label>
+    <span class="count" id="count"></span>
+  </div>
+  <div class="card">
+    <table>
+      <thead><tr>
+        <th class="sortable" data-key="date">日期 <span class="arrow" id="a-date"></span></th>
+        <th>航线</th><th>计划</th><th>承运人</th>
+        <th class="sortable" data-key="miles">里程 <span class="arrow" id="a-miles"></span></th>
+        <th>税费</th>
+        <th class="sortable" data-key="seats">余位 <span class="arrow" id="a-seats"></span></th>
+        <th>转点建议</th><th>最近确认</th>
+      </tr></thead>
+      <tbody id="rows">
+__ROWS__
+      </tbody>
+    </table>
+    <div class="empty" id="empty" hidden>没有符合当前筛选的放位</div>
+  </div>
+  <footer>余位"未知"表示该计划不公布数量，不代表没有位。下单前请到航司官网或 seats.aero 核实实时库存；转点不可逆——先确认库存，再转点，并立即出票。</footer>
+</div>
+<script>
+  const tbody = document.getElementById("rows");
+  const allRows = Array.from(tbody.rows);
+  const selects = { origin: document.getElementById("f-origin"), dest: document.getElementById("f-dest"), program: document.getElementById("f-program") };
+  const execBox = document.getElementById("f-exec");
+  let sortKey = "date", sortAsc = true;
+
+  function apply() {
+    let shown = 0;
+    for (const tr of allRows) {
+      const ok = (!selects.origin.value || tr.dataset.origin === selects.origin.value)
+        && (!selects.dest.value || tr.dataset.dest === selects.dest.value)
+        && (!selects.program.value || tr.dataset.program === selects.program.value)
+        && (!execBox.checked || tr.dataset.exec === "1");
+      tr.hidden = !ok;
+      if (ok) shown++;
+    }
+    document.getElementById("count").textContent = "显示 " + shown + " / " + allRows.length + " 条";
+    document.getElementById("empty").hidden = shown > 0;
+  }
+
+  function sort() {
+    const dir = sortAsc ? 1 : -1;
+    const val = tr => sortKey === "date" ? tr.dataset.date : Number(tr.dataset[sortKey]);
+    allRows.sort((a, b) => (val(a) < val(b) ? -1 : val(a) > val(b) ? 1 : 0) * dir);
+    allRows.forEach(tr => tbody.appendChild(tr));
+    for (const k of ["date", "miles", "seats"])
+      document.getElementById("a-" + k).textContent = k === sortKey ? (sortAsc ? "\\u25b2" : "\\u25bc") : "";
+  }
+
+  for (const s of Object.values(selects)) s.addEventListener("change", apply);
+  execBox.addEventListener("change", apply);
+  for (const th of document.querySelectorAll("th.sortable"))
+    th.addEventListener("click", () => {
+      const k = th.dataset.key;
+      sortAsc = k === sortKey ? !sortAsc : true;
+      sortKey = k;
+      sort();
+    });
+  sort();
+  apply();
+</script>
+</body>
+</html>
+"""
+
+
 def write_dashboard(
     path: Path,
     conn: sqlite3.Connection,
@@ -509,6 +661,11 @@ def write_dashboard(
         """
     ).fetchall()
 
+    program_names = {
+        key: value.get("display", key)
+        for key, value in partners.get("programs", {}).items()
+    }
+
     def row_advice(r: tuple) -> str:
         hit = AvailabilityHit(
             origin=str(r[1]), destination=str(r[2]), date=str(r[0]), cabin=str(r[12]),
@@ -518,54 +675,59 @@ def write_dashboard(
         )
         return build_transfer_advice(hit, wallet, partners)
 
-    table_rows = "\n".join(
-        "<tr>"
-        f"<td>{html.escape(str(r[0]))}</td>"
-        f"<td><b>{html.escape(str(r[1]))} → {html.escape(str(r[2]))}</b></td>"
-        f"<td>{html.escape(str(r[3]))}</td>"
-        f"<td>{html.escape(str(r[4]))}</td>"
-        f"<td>{html.escape(str(r[5]))}</td>"
-        f"<td>{html.escape(format_seats(int(r[6] or 0)))}</td>"
-        f"<td>{r[7]} {html.escape(str(r[8]))}</td>"
-        f"<td>{html.escape(row_advice(r))}</td>"
-        f"<td>{html.escape(str(r[9]))}</td>"
-        f"<td>{html.escape(str(r[10]))}</td>"
-        "</tr>"
-        for r in rows
-    )
+    origins, dests, programs = set(), set(), set()
+    exec_count = 0
+    min_exec_miles = 0
+    row_html: list[str] = []
+    for r in rows:
+        advice = row_advice(r)
+        executable = advice.startswith("✔")
+        miles = int(r[11] or 0)
+        if executable:
+            exec_count += 1
+            if miles > 0 and (min_exec_miles == 0 or miles < min_exec_miles):
+                min_exec_miles = miles
+        origins.add(str(r[1]))
+        dests.add(str(r[2]))
+        programs.add(str(r[3]))
+        program_label = program_names.get(str(r[3]), str(r[3]))
+        row_html.append(
+            f"<tr{' class=\"exec\"' if executable else ''}"
+            f" data-origin=\"{html.escape(str(r[1]))}\" data-dest=\"{html.escape(str(r[2]))}\""
+            f" data-program=\"{html.escape(str(r[3]))}\" data-exec=\"{1 if executable else 0}\""
+            f" data-date=\"{html.escape(str(r[0]))}\" data-miles=\"{miles}\" data-seats=\"{int(r[6] or 0)}\">"
+            f"<td class=\"num\">{html.escape(str(r[0]))}</td>"
+            f"<td class=\"route\">{html.escape(str(r[1]))} → {html.escape(str(r[2]))}</td>"
+            f"<td>{html.escape(program_label)}</td>"
+            f"<td class=\"dim\">{html.escape(str(r[4]))}</td>"
+            f"<td class=\"num\">{miles:,}</td>"
+            f"<td class=\"num\">{html.escape(format_taxes(int(r[7] or 0), str(r[8])))}</td>"
+            f"<td class=\"num\">{html.escape(format_seats(int(r[6] or 0)))}</td>"
+            f"<td class=\"advice\">{html.escape(advice)}</td>"
+            f"<td class=\"dim\">{html.escape(str(r[10])[:16])}</td>"
+            "</tr>"
+        )
 
-    doc = f"""<!doctype html>
-<html lang="zh">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Award Watch Dashboard</title>
-  <style>
-    :root {{ color-scheme: light dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif; }}
-    body {{ margin: 0; padding: 28px; background: #f5f6f4; color: #1d2528; }}
-    h1 {{ font-size: 22px; }}
-    p {{ color: #5d676b; }}
-    table {{ width: 100%; border-collapse: collapse; background: #fff; }}
-    th, td {{ text-align: left; padding: 8px; border-top: 1px solid #e6ebe8; }}
-    th {{ background: #eef2ef; }}
-    @media (prefers-color-scheme: dark) {{
-      body {{ background: #111716; color: #e7ece9; }}
-      table {{ background: #182220; }}
-      th {{ background: #1f2b28; }}
-      td, th {{ border-top: 1px solid #26332f; }}
-    }}
-  </style>
-</head>
-<body>
-  <h1>Award Watch — 美日商务舱里程放位</h1>
-  <p>Last updated: {html.escape(local_now_text())} · 当前记录到的可订位次数: {len(rows)}</p>
-  <table>
-    <tr><th>日期</th><th>航线</th><th>项目</th><th>承运人</th><th>里程</th><th>余位</th><th>税费</th><th>转点建议</th><th>首次发现</th><th>最近确认</th></tr>
-    {table_rows}
-  </table>
-</body>
-</html>
-"""
+    def options(values: set[str], labels: dict[str, str] | None = None) -> str:
+        return "".join(
+            f"<option value=\"{html.escape(v)}\">{html.escape((labels or {}).get(v, v))}</option>"
+            for v in sorted(values)
+        )
+
+    bank_points = sum(int(v or 0) for v in (wallet or {}).get("points", {}).values())
+    doc = (
+        DASHBOARD_TEMPLATE
+        .replace("__UPDATED__", html.escape(local_now_text()))
+        .replace("__EXEC_COUNT__", f"{exec_count:,}" if wallet else "—")
+        .replace("__TOTAL_COUNT__", f"{len(rows):,}")
+        .replace("__MIN_MILES__", f"{min_exec_miles:,}" if min_exec_miles else "—")
+        .replace("__BANK_POINTS__", f"{bank_points:,}" if wallet else "—")
+        .replace("__ORIGIN_OPTIONS__", options(origins))
+        .replace("__DEST_OPTIONS__", options(dests))
+        .replace("__PROGRAM_OPTIONS__", options(programs, program_names))
+        .replace("__EXEC_CHECKED__", " checked" if exec_count else "")
+        .replace("__ROWS__", "\n".join(row_html))
+    )
     path.write_text(doc, encoding="utf-8")
 
 

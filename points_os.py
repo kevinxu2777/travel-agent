@@ -241,7 +241,7 @@ def build_advise(
             risk_note = "  ⚠️ 转点非即时到账，超出你设定的风险偏好(low)"
         line = (
             f"  {hit.date} {hit.origin}→{hit.destination} [{hit.program}] {hit.airlines} "
-            f"{hit.mileage_cost_raw:,} 里程 + 税费 {hit.taxes} {hit.taxes_currency} "
+            f"{hit.mileage_cost_raw:,} 里程 + 税费 {award_watch.format_taxes(hit.taxes, hit.taxes_currency)} "
             f"余位:{award_watch.format_seats(hit.remaining_seats)}\n    {advice}{risk_note}"
         )
         bookable.append((hit.mileage_cost_raw, line))
